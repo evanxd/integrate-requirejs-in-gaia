@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Introduce Mozart</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+</head>
+
+<body>
+  <pre id="source">
+
+class: center, middle
+
+# Integrate RequireJS in [Gaia](http://github.com/mozilla-b2g/gaia)
+## [:evanxd](http://github.com/evanxd)
+
+---
+
+# Agenda
+
+## [Why we do this](index.html#3)
+## [Introduce RequireJS](index.html#5)
+## [How to integrate in Gaia](index.html#9)
+* Settings app as example
+
+---
+
+# Why do this
+## Modularization (with [AMD](https://github.com/amdjs/amdjs-api/wiki/AMD))
+* Maintainable, dependency manager
+* Testable, easy to mock
+* Resuable for the Web
+* Good for responsive design
+
+---
+
+# What is [AMD](https://github.com/amdjs/amdjs-api/wiki/AMD)
+## Asynchronous Module Definition
+### Define modules and its dependencies can be asynchronously loaded.
+```
+define('id', ['dependency1', 'dependency2'],
+  function (dependency1, dependency2) {
+    function Module(params) {
+      this.params = params;
+    }
+    Module.prototype = {
+      hello: function() {
+        dependency1();
+        dependency2();
+      }
+    };
+    return Module;
+  }
+);
+```
+
+---
+
+# What is [RequireJS](http://requirejs.org)
+## AMD module loader optimized for in-browser use.
+* Modularization
+* Dependency manager
+* No more globals and namespace problems
+* End script tag hell
+
+---
+
+class: middle
+
+# Get Started for RequireJS (1/3)
+## index.html
+```
+&lt;head&gt;
+  &lt;script data-main="js/main" src="js/require.js"&gt;&lt;/script&gt;
+&lt;/head&gt;
+```
+
+---
+
+class: middle
+
+# Get Started for RequireJS (2/3)
+## js/main.js
+```
+// Entry point.
+require(['module'], function(module) {
+  module();
+});
+```
+
+---
+
+class: middle
+
+# Get Started for RequireJS (3/3)
+## js/module.js
+```
+// Pattern 1.
+define(function() {
+  return function() {
+    console.log('Hello world.');
+  };
+});
+```
+```
+// Pattern 2.
+define(function(require, exports, module) {
+  exports = function() {
+    console.log('Hello world.');
+  };
+});
+
+```
+
+---
+
+class: middle
+
+# Integrate RequireJS in Gaia
+
+![Test-driven](images/test-code-refactor-cycle.png)
+
+### 1. Integration(unit?) tests for stability
+* Don't break the code
+
+### 2. Do [AMD]((https://github.com/amdjs/amdjs-api/wiki/AMD) from main modules to sub modules
+* Infrastructure for refactoring
+
+---
+
+class: middle
+
+# We got problems!
+## How to deal with non-AMD modules?
+1. Somehow, can't build new modules with AMD
+2. Require the non-AMD modules already existed
+
+---
+
+class: middle
+
+# For new modules
+* Only one module in a file
+* Build it with anonymous function pattern
+
+```
+(function(namespace) {
+  function Module() {}
+
+  namespace.Module = Module;
+})(namespace);
+```
+
+---
+
+class: middle
+
+# For existed modules
+* Wrap the modules as AMD ones
+
+```
+// wrapped_settings.js
+
+require.config({
+  shim: {
+    settings: {
+      exports: 'Settings'
+    }
+  }
+});
+
+define(function(require) {
+  var settings = require('settings');
+  return settings;
+});
+```
+
+---
+
+class: center, middle
+
+# Example: integrate in [Settings app](https://github.com/mozilla-b2g/gaia/tree/master/apps/settings)
+## all tests are passed
+![Travis](images/travis.png)
+
+---
+
+class: center, middle
+
+# [Draft work for the integration](https://github.com/evanxd/gaia/commit/a12fdfce661d8a8c6a43c3cc8930c2257c7d460d)
+
+---
+
+class: center, middle
+
+# Q & A
+
+  </pre>
+  <script src="http://gnab.github.io/remark/downloads/remark-0.5.7.min.js"></script>
+  <script type="text/javascript">
+    var slideshow = remark.create();
+  </script>
+</body>
+</html>
